@@ -1,0 +1,244 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.ironapi</groupId>
+  <artifactId>jexer-tui</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>jexer-tui</name>
+  <description>Terminal GUI based on jexer test</description>
+  
+  
+    <properties>
+        <java.version>21</java.version>
+        <!-- MVNW_VERBOSE=true mvn wrapper:wrapper -Dtype=bin -->
+        <maven.version>3.9.9</maven.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- 
+            to perform version check run 
+            mvn versions:display-parent-updates versions:display-property-updates versions:display-plugin-updates versions:display-dependency-updates
+            
+            to actually PERFORM version updates run 
+            mvn versions:update-properties versions:use-latest-releases
+        -->
+        <exec.mainClass>com.ironapi.tui.jexer.Main</exec.mainClass>
+    </properties>
+  
+  	<dependencyManagement>
+		<dependencies>
+			<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+			<dependency>
+			    <groupId>org.slf4j</groupId>
+			    <artifactId>slf4j-api</artifactId>
+			    <version>2.0.16</version>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+			<dependency>
+			    <groupId>org.slf4j</groupId>
+			    <artifactId>slf4j-simple</artifactId>
+			    <version>2.0.16</version>
+			    <scope>runtime</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>1.18.36</version>
+				<scope>provided</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	
+
+	<build>
+		<finalName>${project.artifactId}-${project.version}-${git.branch}-${git.commit.id.describe-short}</finalName>
+		<defaultGoal>clean package</defaultGoal>
+		<resources>
+			<resource>
+        			<directory>src/main/resources/</directory>
+        			<filtering>false</filtering>
+      			</resource>
+			<resource>
+        		<directory>src/main/resources/</directory>
+				<includes>
+					<include>finalName.sh</include>
+				</includes>
+        		<filtering>true</filtering>
+      		</resource>
+		</resources>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>3.5.0</version>
+				</plugin>
+				<plugin>
+				    <groupId>pl.project13.maven</groupId>
+				    <artifactId>git-commit-id-plugin</artifactId>
+				    <version>4.9.10</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>versions-maven-plugin</artifactId>
+					<version>2.18.0</version>
+					<configuration>
+						<ruleSet>
+							<!-- ignore alpha, previes etc versions -->
+							<ignoreVersions>
+								<ignoredVersions>
+									<type>regex</type>
+									<version>(.*-alpha.*|.*-beta.*|.*-preview)</version>
+								</ignoredVersions>
+							</ignoreVersions>										
+						</ruleSet>
+					</configuration>
+				</plugin>
+				<plugin>
+				    <groupId>org.apache.maven.plugins</groupId>
+				    <artifactId>maven-compiler-plugin</artifactId>
+				    <version>3.13.0</version>
+				    <configuration>
+						<release>${java.version}</release>
+						<compilerArgs>
+							<arg>-proc:full</arg>
+						</compilerArgs>
+					</configuration>
+				</plugin>
+				<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-assembly-plugin -->
+				<plugin>
+				    <groupId>org.apache.maven.plugins</groupId>
+				    <artifactId>maven-assembly-plugin</artifactId>
+				    <version>3.7.1</version>
+				</plugin>
+				<!-- https://mvnrepository.com/artifact/org.codehaus.mojo/exec-maven-plugin -->
+				<plugin>
+				    <groupId>org.codehaus.mojo</groupId>
+				    <artifactId>exec-maven-plugin</artifactId>
+				    <version>3.5.0</version>
+				</plugin>
+
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-maven</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>${maven.version}</version>
+								</requireMavenVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+			    <groupId>pl.project13.maven</groupId>
+			    <artifactId>git-commit-id-plugin</artifactId>
+			    <executions>
+			        <execution>
+			            <id>get-the-git-infos</id>
+			            <goals>
+			                <goal>revision</goal>
+			            </goals>
+			            <phase>validate</phase>
+			        </execution>
+			    </executions>
+			    <configuration>
+			        <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+			    </configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>${exec.mainClass}</mainClass>
+						</manifest>
+					</archive>
+        
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+      			</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>	
+      							
+			</plugin>
+			
+			<plugin>
+		    	<groupId>org.codehaus.mojo</groupId>
+	    		<artifactId>exec-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+					</execution>
+				</executions>	
+				<configuration>
+					<executable>sh</executable>
+					<!-- optional -->
+					<workingDirectory>${project.build.directory}</workingDirectory>
+					<arguments>
+						<!-- <argument>cat</argument>  -->
+						<argument>${project.basedir}/src/main/sh/makeshexec.sh</argument>
+						<argument>${project.basedir}/src/main/sh/stub.sh</argument>
+						<argument>${project.build.directory}/${project.build.finalName}-jar-with-dependencies.jar</argument>
+						<argument>${project.build.directory}/${project.build.finalName}.sh</argument>
+					</arguments>
+				</configuration>						
+			</plugin>
+			
+		</plugins>		
+	</build>
+  
+	<dependencies>
+    
+		<dependency>
+			<groupId>com.gitlab.klamonte</groupId>
+			<artifactId>jexer</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+
+	    <!-- https://mvnrepository.com/artifact/com.zaxxer/HikariCP -->
+		<dependency>
+		    <groupId>com.zaxxer</groupId>
+		    <artifactId>HikariCP</artifactId>
+		    <version>6.2.1</version>
+		</dependency>
+
+	    <dependency>
+	    	<groupId>org.postgresql</groupId>
+	    	<artifactId>postgresql</artifactId>
+	    	<version>42.7.5</version>
+	    </dependency>
+		
+	    <dependency>
+	    	<groupId>org.slf4j</groupId>
+	    	<artifactId>slf4j-api</artifactId>
+	    </dependency>
+	    <dependency>
+	    	<groupId>org.slf4j</groupId>
+	    	<artifactId>slf4j-simple</artifactId>
+	    	<scope>runtime</scope>
+	    </dependency> 
+	</dependencies>
+	
+</project>
